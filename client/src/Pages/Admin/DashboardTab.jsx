@@ -7,20 +7,26 @@ import { AiFillEdit, AiFillDelete } from 'react-icons/ai';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from "axios"
 
+
 function DashboardTab() {
     const context = useContext(myContext)
-    const navigate = useNavigate
-    const {mode, products,users} = context
+    const navigate = useNavigate();
+    const {mode, products,users,setProducts} = context
     const deleteProduct = (id) => {
-        axios.delete('http://localhost:4000/product/deleteproduct/'+id)
-        .then(res => {
-            console.log(res)
-            window.location.reload()
-        })
-        .catch(err => console.log(err))
+        const confirmed = window.confirm("Are you sure you want to delete this product?");
+        if (confirmed) {
+            axios.delete(`http://localhost:4000/product/deleteproduct/${id}`)
+                .then(res => {
+                    console.log(res);
+                    setProducts((prevProducts) =>
+                        prevProducts.filter((product) => product._id !== id)
+                    );
+                })
+                .catch(err => console.log(err));
+        }
     }
     const submit = () => {
-        navigate('addproduct');
+        navigate('/addproduct');
         window.location.reload();
     }
     return (

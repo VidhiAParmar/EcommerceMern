@@ -23,7 +23,7 @@ router.post('/addtocart', async (req,res)=> {
     }
 })
 
-router.delete('/deletefromcart',async (req,res)=>{
+router.delete('/deletefromcart/:uid/:pid',async (req,res)=>{
     try {
         const {uid,pid} = req.body;
         
@@ -39,10 +39,10 @@ router.delete('/deletefromcart',async (req,res)=>{
         res.json({message: "error to delete"})
     }
 })
-router.get('/getcartitem/:id', async (req,res) => {// Retrieve userId from query parameters
+router.get('/getcartitem/:id', async (req, res) => {
     try {
         const userId = req.params.id; 
-        const user = await User.findById({_id:userId}); // Use userId directly
+        const user = await User.findById(userId); // Correct usage of findById
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -54,9 +54,10 @@ router.get('/getcartitem/:id', async (req,res) => {// Retrieve userId from query
         });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({ message: error.message }); // Return specific error message
     }
 });
+
 
 
 module.exports = router;

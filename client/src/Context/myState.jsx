@@ -8,17 +8,14 @@ function myState(props) {
     const [products,setProducts] = useState([]);
     const [users,setUsers] = useState([]);
     const [admins,setAdmins] = useState([]);
-    const [userLoggedIn,setUserLoggedIn] = useState(false);
-    const [adminLoggedIn,setAdminLoggedIn] = useState(false);
-    const [userId,setuserId] = useState("");
-    const [adminId,setAdminId] = useState("");
-    const [authToken,setAuthToken] = useState("");
-    const [user,setUser] = useState([])
+    const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+    const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
     const [email, setEmail] = useState("");
-    const [admin,setAdmin]= useState([]);
-    const [adminAuthToken,setAdminAuthToken] = useState("");
-    const [flag,setFlag] = useState(false);
     const [password, setPassword] = useState("");
+    const [total, setTotal] = useState(0);
+    const [userId, setuserId] = useState("");
+    const [cartItems, setCartItems] = useState([]);
+    const [cartCount,setCartCount] = useState(0);
     const api = "http://localhost:4000";
 
     useEffect(()=>{
@@ -36,6 +33,26 @@ function myState(props) {
 
     },[])
 
+    useEffect(()=>{
+        const getCartItem = (id) => { 
+        let res = axios.get( `${api}/cart/getcartitem/${id}`)
+        console.log(res);
+        }
+        getCartItem(userId)
+    },[isUserLoggedIn])
+
+    useEffect(()=>{
+        const storedIsUserLoggedIn = localStorage.getItem("isUserLoggedIn");
+        const user = localStorage.getItem('user');
+        setIsUserLoggedIn(storedIsUserLoggedIn === true);
+        if(storedIsUserLoggedIn){
+            setuserId(user.userId);
+        }
+    
+        const storedIsAdminLoggedIn = localStorage.getItem('isAdminLoggedIn');
+        setIsAdminLoggedIn(storedIsAdminLoggedIn === true);
+      },[])
+
     const toggleMode = () => {
         if (mode === 'light') {
             setMode('dark');
@@ -49,9 +66,9 @@ function myState(props) {
 
     return (
         <myContext.Provider value={{
-            mode, toggleMode, users, setUsers, admins,setAdmins, products,setProducts, userLoggedIn, setUserLoggedIn, userId, setuserId, authToken, setAuthToken,
-            email,setEmail, password, setPassword, user,setUser, admin, setAdmin, setAdminId, adminId, adminLoggedIn, setAdminLoggedIn, adminAuthToken, setAdminAuthToken,
-            flag,setFlag
+            mode, toggleMode, users, setUsers, admins,setAdmins, products,setProducts, 
+            email,setEmail, password, setPassword,isAdminLoggedIn, setIsAdminLoggedIn, isUserLoggedIn, setIsUserLoggedIn,
+            userId,setuserId, cartItems, setCartItems, cartCount, setCartCount, total, setTotal,
         }}>
             {props.children}
         </myContext.Provider>

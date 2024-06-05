@@ -10,7 +10,7 @@ function Signup() {
     const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // regex for email
     const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
     const navigate = useNavigate();
-    const {admins,setFlag} = useContext(myContext);
+    const {admins} = useContext(myContext);
     const [loginType, setLoginType] = useState('user');
 
     // Function to handle changes in the selected login type
@@ -27,10 +27,10 @@ function Signup() {
         // Handle login based on the selected login type
         if (loginType === 'user') {
             // User login logic
-            setFlag(false)
+            flag=0;
         } else if (loginType === 'admin') {
             // Admin login logic
-            setFlag(true)
+            flag = 1;
         }
         if(!email.length){
             return toast.error("Email is required")

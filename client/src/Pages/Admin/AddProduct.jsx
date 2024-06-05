@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import {useNavigate} from "react-router-dom";
 import axios from 'axios';
-import {Toaster, toast} from 'react-hot-toast'
+import {Toaster, toast} from 'react-hot-toast';
+import myContext from '../../Context/myContext';
 
 
 function AddProduct() {
@@ -10,6 +11,8 @@ function AddProduct() {
     const [description,setDescription] = useState();
     const [imageUrl,setImageUrl] = useState();
     const [category,setCategory] = useState();
+    const context = useContext(myContext)
+    const {mode, products,users,setProducts} = context
     const navigate = useNavigate();
    
     
@@ -20,6 +23,7 @@ function AddProduct() {
                 setTimeout(() => {
                     console.log(result)
                     toast.success("Product added successfully")
+                    setProducts([...products, result.data.data]); 
                     navigate('/dashboard')
                 }, 1000);
             })

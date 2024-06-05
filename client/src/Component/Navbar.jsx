@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { BsFillCloudSunFill } from 'react-icons/bs'
 import { FiSun } from 'react-icons/fi'
 import myContext from '../Context/myContext'
@@ -10,46 +10,56 @@ import axios from "axios"
 export default function Navbar() {
 
   const context = useContext(myContext)
-  const { toggleMode, mode,user,userId ,authToken,userLoggedIn,adminLoggedIn,adminAuthToken} = context
-  let cartItem = user.cart;
-  let count = cartItem ? cartItem.length : 0;
-  console.log("user mate: "+userLoggedIn+" admin : "+ adminLoggedIn)
-  const getCartItem = async () => {
-    let cartItem = await axios.get("http://localhost/cart/getcartitem",{userId})
-    console.log(cartItem);
+  const { toggleMode, mode,setIsUserLoggedIn, setIsAdminLoggedIn, cartItems, setCartItems, cartCount, setCartCount} = context
+  let user = JSON.parse(localStorage.getItem('user'));
+  let admin = JSON.parse(localStorage.getItem('admin'));
+  let isUserLoggedIn = localStorage.getItem('isUserLoggedIn')
+  let isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn');
+  console.log("user mate: "+isUserLoggedIn+" admin : "+ isAdminLoggedIn)
+  let navigate = useNavigate();
+  let userId ;
+ if(user !== null){
+  userId = user.userId
+ }
+ const getCartItem = async (id) => {
+  try {
+    const res = await axios.get(`http://localhost:4000/cart/getcartitem/${id}`);
+    console.log(res);
+    setCartItems(res.data.data);
+    setCartCount(res.data.data.length); // Update cartCount directly with the length of cart items
+  } catch (error) {
+    console.error("Error fetching cart items:", error);
   }
-  const checkUser = () => {
-    if(userLoggedIn){
-      cartItem = user.cart
-    }
-  }
-  const adminLogout = async () => {
-    await axios.get('http://localhost:4000/admin/logout',{
-      headers: {
-          Authorization: `Bearer ${adminAuthToken}`
-      }
-  })
-  }
-  const userLogout = async () => {
-    await axios.get('http://localhost:4000/auth/logout',{
-      headers: {
-          Authorization: `Bearer ${authToken}`
-      }
-  })
-  }
-  
-  useEffect(()=>{
-    checkUser();
-  },[])
+};
 
-  const logout = () => {
-    if(adminLoggedIn){
-      adminLogout();
-    }else{
-      userLogout();
+
+  useEffect(() => {
+    if (isUserLoggedIn) {
+      console.log(" im userlOGGEDINs")
+      getCartItem(user.userId);
     }
-    window.location.href = "/"
-  }
+  }, [isUserLoggedIn]); 
+
+  const logout = async () => {
+    // Implement logout functionality here
+    if(isAdminLoggedIn){
+      let res = await axios.get('http://localhost:4000/admin/logout',{
+    });
+      console.log(res);
+      localStorage.removeItem('isAdminLoggedIn');
+      localStorage.removeItem('admin');
+      setIsAdminLoggedIn(false);
+      navigate('/');
+    }else{
+      let res = await axios.get('http://localhost:4000/auth/logout',{
+    });
+      console.log(res);
+      localStorage.removeItem('isUserLoggedIn');
+      localStorage.removeItem('user');
+      setIsUserLoggedIn(false);
+      window.location.reload();
+    }
+}
 
 
   return (
@@ -75,10 +85,10 @@ export default function Navbar() {
                 <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
                  
                   <Link to={'/'} className="text-sm font-medium text-gray-700 cursor-pointer" style={{ color: mode === 'dark' ? 'white' : '', }}>Home</Link>
-                  {adminLoggedIn ? <Link to={'/dashboard'} className="text-sm font-medium text-gray-700 cursor-pointer" style={{ color: mode === 'dark' ? 'white' : '', }}>Dashboard</Link> : " "}
+                  {isAdminLoggedIn ? <Link to={'/dashboard'} className="text-sm font-medium text-gray-700 cursor-pointer" style={{ color: mode === 'dark' ? 'white' : '', }}>Dashboard</Link> : " "}
                  
 
-                  {userLoggedIn || adminLoggedIn ? <p onClick={() => logout()} className="text-sm font-medium text-gray-700 cursor-pointer" style={{ color: mode === 'dark' ? 'white' : '', }}>
+                  {isUserLoggedIn || isAdminLoggedIn ? <p onClick={() => logout()} className="text-sm font-medium text-gray-700 cursor-pointer" style={{ color: mode === 'dark' ? 'white' : '', }}>
                     Logout
                   </p> : <Link to={'/login'} className="text-sm font-medium text-gray-700 cursor-pointer  " style={{ color: mode === 'dark' ? 'white' : '', }}>
                     Login
@@ -109,10 +119,10 @@ export default function Navbar() {
                 </div>
 
                 {/* Cart */}
-                {!adminLoggedIn ? <div className="ml-4 flow-root lg:ml-6">
+                {!isAdminLoggedIn ? <div className="ml-4 flow-root lg:ml-6">
                   <Link to={'/cart'} className="group -m-2 flex items-center p-2" style={{ color: mode === 'dark' ? 'white' : '', }}>
                   <BsCart3 size={20}/>
-                    <span className="ml-2 text-sm font-medium text-gray-700 group-" style={{ color: mode === 'dark' ? 'white' : '', }}>{count}</span>
+                    <span className="ml-2 text-sm font-medium text-gray-700 group-" style={{ color: mode === 'dark' ? 'white' : '', }}>{cartCount}</span>
                   </Link>
                 </div> : ""}
                 
